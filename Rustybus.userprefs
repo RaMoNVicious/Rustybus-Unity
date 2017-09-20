@@ -1,0 +1,33 @@
+﻿<Properties StartupItem="Assembly-CSharp.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/scripts/RoadFactory.cs">
+    <Files>
+      <File FileName="Assets/scripts/GameCore.cs" Line="91" Column="55" />
+      <File FileName="Assets/scripts/BotFactory.cs" Line="77" Column="4" />
+      <File FileName="Assets/scripts/RoadFactory.cs" Line="45" Column="36" />
+      <File FileName="Assets/scripts/RoadBorder.cs" Line="7" Column="21" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="Rustybus" expanded="True">
+            <Node name="Assembly-CSharp" expanded="True">
+              <Node name="scripts" expanded="True">
+                <Node name="RoadFactory.cs" selected="True" />
+              </Node>
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+      <Pad Id="MonoDevelop.NUnit.TestPad">
+        <State name="__root__">
+          <Node name="Rustybus" expanded="True" selected="True" />
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>

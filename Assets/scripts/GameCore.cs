@@ -11,8 +11,8 @@ public class GameCore : MonoBehaviour {
 
 	public GameObject player;
 	
+	List<GameObject> bgs = new List<GameObject>();
 	List<GameObject> roads = new List<GameObject>();
-	public GameObject[] deserts;
     List<GameObject> borders = new List<GameObject>();
 	List<GameObject> bots = new List<GameObject>();
 	public GameObject[] items;
@@ -33,12 +33,13 @@ public class GameCore : MonoBehaviour {
 
 		speed = player.GetComponent<PlayerCore>().Speed;
 
-		initDesert();
-		initRoads();
-
-        roadFactory = GetComponent<RoadFactory>();
-        roadFactory.initBorders(borders);
+		
+		// Enveronment initialization
+		roadFactory = GetComponent<RoadFactory>();
+        
+		roadFactory.initBgs(bgs);
 		roadFactory.initRoads(roads);
+		roadFactory.initBorders(borders);
 	}
 
     public void startGame() {
@@ -55,47 +56,17 @@ public class GameCore : MonoBehaviour {
         botFactory.initBots(bots, 4);
     }
 
-	void initRoads() {
-		if (roads.Length < 0) return;
-		float width = roads[0].GetComponent<Renderer>().bounds.size.x;
-
-		roads[0].transform.position = new Vector3 (0f - width/2f, 0f, 0f);
-		for (int i = 1; i < roads.Length; i++) {
-			roads[i].transform.position = new Vector3 (i * width - width/2f, 0f, 0f);
-		}
-	}
-
-	void initDesert() {
-		if (deserts.Length < 0) return;
-		float width = deserts[0].GetComponent<Renderer>().bounds.size.x;
-
-		deserts[0].transform.position = new Vector3 (0f - width/2f, 0f, 0f);
-		for (int i = 1; i < deserts.Length; i++) {
-			deserts[i].transform.position = new Vector3 (i * width - width/2f, 0f, 0f);
-		}
-	}
 		
 	// Update is called once per frame
 	void Update() {
 		float dt = Time.deltaTime;
-
-		updateDeserts(dt);
 
 		botFactory = GetComponent<BotFactory> ();
 		botFactory.updateBots(bots, speed, dt);
 
         roadFactory = GetComponent<RoadFactory>();
         roadFactory.updateBorders(borders, speed, dt);
-	}
-
-	void updateDeserts(float dt) {
-		for (int i = 0; i < deserts.Length; i++) {
-			deserts[i].transform.position = new Vector3(deserts[i].transform.position.x - dt * speed, 0f, 0f);
-
-			float width = deserts[i].GetComponent<Renderer>().bounds.size.x;
-			if (deserts[i].transform.position.x + width < 0f) {
-				deserts[i].transform.position = new Vector3(deserts[i].transform.position.x + width * 2f, 0f, 0f);
-			}				
-		}
+		roadFactory.updateRoads(roads, speed, dt);
+		roadFactory.updateBgs(bgs, speed, dt);
 	}
 }
