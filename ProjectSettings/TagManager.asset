@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - DialogStart
+  - DialogEnd
+  - DialogDashboard
   layers:
   - Default
   - TransparentFX

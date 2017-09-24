@@ -39,6 +39,13 @@ public class BotFactory : MonoBehaviour {
 		bots.Add(newBot);
 	}
 
+	public void clearBots(List<GameObject> bots) {
+		foreach (GameObject bot in bots) {
+			Destroy(bot);
+		}
+		bots.Clear();
+	}
+
 	Vector3 getBotPosition(List<GameObject> bots) {
 		const float MIN_DISTANCE = 5f;
 		const float START_X_MIN = 20f;
@@ -60,9 +67,9 @@ public class BotFactory : MonoBehaviour {
 		return position;
 	}
 
-	public void updateBots(List<GameObject> bots, float playerSpeed, float dt) {
+	public Boolean updateBots(GameObject player, List<GameObject> bots, float dt) {
 		for (int i = 0; i < bots.Count; i++) {
-			float botSpeed = playerSpeed - bots [i].GetComponent<BotCore>().speed;
+			float botSpeed = player.GetComponent<PlayerCore>().Speed - bots [i].GetComponent<BotCore>().speed;
 			bots[i].transform.position = new Vector3(bots[i].transform.position.x - dt * botSpeed, bots[i].transform.position.y, 0f);
 			bots[i].GetComponent<BotCore>().botSafety (bots);
 
@@ -74,7 +81,23 @@ public class BotFactory : MonoBehaviour {
                 bots.Remove(bots[i]);
                 break;
             }
+
+			if (isCollide(player, bots[i]))
+				return true;
 		}
+
+		return false;
+	}
+	
+	public Boolean isCollide(GameObject player, GameObject bot) {
+		Rect playerRect = new Rect(player.transform.position, new Vector2(player.GetComponent<Collider2D>().bounds.size.x, player.GetComponent<Collider2D>().bounds.size.y));
+		Rect botRect = new  Rect(bot.transform.position, new Vector2(bot.GetComponent<Collider2D>().bounds.size.x, bot.GetComponent<Collider2D>().bounds.size.y));
+		
+		if (playerRect.Overlaps(botRect)) {
+			return true;
+		}
+
+		return false;
 	}
 
 	// Use this for initialization

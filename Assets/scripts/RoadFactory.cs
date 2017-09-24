@@ -32,8 +32,10 @@ public class RoadFactory : MonoBehaviour {
         addBg(bgs);
     }
 
-    GameObject getNewBorder(int side) {
-        GameObject border = side == BORDER_TOP ? borderTopPrefabs[Random.Range(0, borderTopPrefabs.Length)] : borderBottomPrefabs[Random.Range(0, borderBottomPrefabs.Length)];
+    GameObject getNewBorder(int side)
+    {
+        int itemIndex = side == BORDER_TOP ? Random.Range(0, borderTopPrefabs.Length) : Random.Range(0, borderBottomPrefabs.Length);
+        GameObject border = side == BORDER_TOP ? borderTopPrefabs[itemIndex] : borderBottomPrefabs[itemIndex];
         border.GetComponent<RoadBorder>().side = side;
         return border;
     }
@@ -51,7 +53,7 @@ public class RoadFactory : MonoBehaviour {
         GameObject newBoroder = Instantiate(getNewBorder(side), new Vector3(0f, 0f, 0f), Quaternion.identity) as GameObject;
         newBoroder.transform.SetParent(transform);
         setBorderPosition(newBoroder, borders, side);
-        newBoroder.GetComponent<Renderer>().sortingOrder = side == BORDER_TOP ? 100 : 1900;
+        newBoroder.GetComponent<Renderer>().sortingOrder = side == BORDER_TOP ? 500 : 1500;
         borders.Add(newBoroder);
     }
 
