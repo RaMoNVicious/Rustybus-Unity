@@ -19,7 +19,7 @@ public class PlayerCore : MonoBehaviour {
 	public float steerAcc;
 	public float steerSpeedMax;
 
-	private Boolean isBordered;
+	public Boolean isBordered;
 	
 	private float durability;
 	public float durabilitySpeed;

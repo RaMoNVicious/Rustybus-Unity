@@ -7,15 +7,22 @@ using Random = UnityEngine.Random;
 public class BotFactory : MonoBehaviour {
 
 	public GameObject[] botPrefabs;
-	int botIndex = 0;
+	private int botIndex = 0;
 
 	public float botSpeedMax;
 	public float botSpeedMin;
 
-	float[] lines = {-2.15f, -0.75f, 0.75f, 2.15f};
-	int[] zOrderLines = {1075, 1025, 975, 925};
+	private float[] lines = {-2.15f, -0.75f, 0.75f, 2.15f};
+	private int[] zOrderLines = {1075, 1025, 975, 925};
+
+	private List<int> overtackesIds = new List<int>();
+	public int overtakes;
 
     public void initBots(List<GameObject> bots, int count) {
+	    overtakes = 0;
+	    overtackesIds.Clear();
+	    botIndex = 0;
+	    
         for (int i = 0; i < count; i++)
             addBot(bots);
     }
@@ -73,11 +80,18 @@ public class BotFactory : MonoBehaviour {
 			bots[i].transform.position = new Vector3(bots[i].transform.position.x - dt * botSpeed, bots[i].transform.position.y, 0f);
 			bots[i].GetComponent<BotCore>().botSafety (bots);
 
+			if (bots[i].transform.position.x <= player.transform.position.x &&
+			    !overtackesIds.Contains(bots[i].GetComponent<BotCore>().id)) {
+				overtackesIds.Add(bots[i].GetComponent<BotCore>().id);
+				overtakes++;
+			}
+
 			if (!bots[i].GetComponent<BotCore>().cloned && bots [i].transform.position.x < 8.5f) {
 				bots[i].GetComponent<BotCore>().cloned = true;
 				addBot(bots);
             } else if (bots[i].transform.position.x < -15f) {
                 Destroy(bots[i]);
+				overtackesIds.Remove(bots[i].GetComponent<BotCore>().id);
                 bots.Remove(bots[i]);
                 break;
             }

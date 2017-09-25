@@ -36,6 +36,8 @@ public class GameCore : MonoBehaviour {
 
 	float speed = 1f;
 	private float distance;
+	private float score;
+	private float scoreSpeed;
 
 	// Use this for initialization
 	void Start() {
@@ -67,6 +69,10 @@ public class GameCore : MonoBehaviour {
 		dialogGameStart.SetActive(true);
 		dialogGameEnd.SetActive(false);
 		gameDashboard.SetActive(false);
+
+		distance = 0;
+		scoreSpeed = 1f;
+		score = 0f;
 		
 		player.GetComponent<PlayerCore>().init();
 		
@@ -80,16 +86,21 @@ public class GameCore : MonoBehaviour {
         dialogGameStart.SetActive(false);
 	    gameDashboard.SetActive(true);
 
-        cameraMain = GameObject.FindGameObjectWithTag("MainCamera");
+        //cameraMain = GameObject.FindGameObjectWithTag("MainCamera");
 
         botFactory = GetComponent<BotFactory>();
-        //botFactory.initBots(bots, 4);
+        botFactory.initBots(bots, 4);
     }
 
 	private void endGame() {
 		gameState = GAME_OVER;
 		dialogGameEnd.SetActive(true);
 		gameDashboard.SetActive(false);
+		
+		GameObject gameResults = GameObject.Find("valuesStatistic");
+		gameResults.GetComponent<Text>().text = Math.Round(score, 0)
+		                                        + "\n" + Math.Round(distance / 100, 2)
+		                                        + "km\n" + botFactory.overtakes;
 	}
 		
 	// Update is called once per frame
@@ -112,8 +123,11 @@ public class GameCore : MonoBehaviour {
 			}
 
 			distance += speed * dt;
+			scoreSpeed += dt;
+			if (!player.GetComponent<PlayerCore>().isBordered) score += scoreSpeed * dt;
 
 			dashboardDurability.GetComponent<Text>().text = "Health: " + player.GetComponent<PlayerCore>().getDurability();
+			dashboardScore.GetComponent<Text>().text = "Score: " + Math.Round(score, 0);
 			dashboardDistance.GetComponent<Text>().text = Math.Round(distance / 100, 2) + "km";
 		}
 	}
