@@ -7,6 +7,7 @@ TagManager:
   - DialogStart
   - DialogEnd
   - DialogDashboard
+  - DialogGuide
   layers:
   - Default
   - TransparentFX

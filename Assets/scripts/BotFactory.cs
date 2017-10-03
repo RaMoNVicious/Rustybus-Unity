@@ -57,7 +57,7 @@ public class BotFactory : MonoBehaviour {
 		const float MIN_DISTANCE = 5f;
 		const float START_X_MIN = 20f;
 		const float START_X_MAX = 40f;
-		const int MAX_COUNT = 100;
+		const int MAX_COUNT = 500;
 
 		Vector3 position;
 
@@ -74,9 +74,9 @@ public class BotFactory : MonoBehaviour {
 		return position;
 	}
 
-	public Boolean updateBots(GameObject player, List<GameObject> bots, float dt) {
+	public Boolean updateBots(GameObject player, float playerSpeed, List<GameObject> bots, float dt) {
 		for (int i = 0; i < bots.Count; i++) {
-			float botSpeed = player.GetComponent<PlayerCore>().Speed - bots [i].GetComponent<BotCore>().speed;
+			float botSpeed = playerSpeed - bots[i].GetComponent<BotCore>().speed;
 			bots[i].transform.position = new Vector3(bots[i].transform.position.x - dt * botSpeed, bots[i].transform.position.y, 0f);
 			bots[i].GetComponent<BotCore>().botSafety (bots);
 
@@ -104,14 +104,22 @@ public class BotFactory : MonoBehaviour {
 	}
 	
 	public Boolean isCollide(GameObject player, GameObject bot) {
-		Rect playerRect = new Rect(player.transform.position, new Vector2(player.GetComponent<Collider2D>().bounds.size.x, player.GetComponent<Collider2D>().bounds.size.y));
-		Rect botRect = new  Rect(bot.transform.position, new Vector2(bot.GetComponent<Collider2D>().bounds.size.x, bot.GetComponent<Collider2D>().bounds.size.y));
+		Rect p = new Rect(player.transform.position, new Vector2(player.GetComponent<Collider2D>().bounds.size.x, player.GetComponent<Collider2D>().bounds.size.y));
+		Rect b = new  Rect(bot.transform.position, new Vector2(bot.GetComponent<Collider2D>().bounds.size.x, bot.GetComponent<Collider2D>().bounds.size.y));
 		
-		if (playerRect.Overlaps(botRect)) {
+		if (p.x + p.width / 2 > b.x - b.width / 2 &&
+		    p.x - p.width / 2 < b.x + b.width / 2 &&
+		    p.y - p.height / 2 < b.y + b.height / 2 &&
+		    p.y + p.height / 2 > b.y - b.height / 2) {
 			return true;
 		}
-
+		
 		return false;
+	}
+
+	public void animationStop(List<GameObject> bots) {
+		for (int i = 0; i < bots.Count; i++)
+			bots[i].GetComponent<BotCore>().animationStop();
 	}
 
 	// Use this for initialization

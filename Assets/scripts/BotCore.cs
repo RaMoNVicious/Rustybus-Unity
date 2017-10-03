@@ -40,6 +40,14 @@ public class BotCore : MonoBehaviour {
 			}
 		}
 	}
+	
+	public void animationStop() {
+		GetComponent<Animator>().enabled = false;
+	}
+	
+	public void animationStart() {
+		GetComponent<Animator>().enabled = true;
+	}
 
 	// Use this for initialization
 	void Start () {

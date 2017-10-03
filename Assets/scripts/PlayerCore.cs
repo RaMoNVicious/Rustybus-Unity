@@ -24,12 +24,16 @@ public class PlayerCore : MonoBehaviour {
 	private float durability;
 	public float durabilitySpeed;
 	
+	private float[] lines = {-2.9f, -2.15f, -1.45f, -0.75f, 0f, 0.75f, 1.45f, 2.15f, 2.9f};
+	private int[] zOrderLines = {1100, 1075, 1050, 1025, 1000, 975, 950, 925, 900};
+	
 
-	public void init() {
+	public void init(Boolean isExtraHealth) {
 		isBordered = false;
 		steering = false;
-		durability = 100;
+		durability = isExtraHealth ? 200 : 100;
 		transform.position = new Vector3(-5f, 0f, 0f);
+		animationStart();
 	}
 
 	public Boolean updatePlayer(float dt) {
@@ -63,6 +67,8 @@ public class PlayerCore : MonoBehaviour {
 		}
 		
 		transform.position = new Vector3(transform.position.x, y, 0f);
+		updateZ(transform.position.y);
+		
 		return checkBordering();
 	}
 
@@ -71,8 +77,25 @@ public class PlayerCore : MonoBehaviour {
 		return durability <= 0;
 	}
 
+	private void updateZ(float y) {
+		for (int i = 0; i < lines.Length; i++) {
+			if (y < lines[i]) {
+				GetComponent<Renderer>().sortingOrder = zOrderLines[i] + 15;
+				break;
+			}
+		}
+	}
+
 	public String getDurability() {
 		return "" + Math.Round(durability, 0) + "%";
+	}
+
+	public void animationStop() {
+		GetComponent<Animator>().enabled = false;
+	}
+	
+	public void animationStart() {
+		GetComponent<Animator>().enabled = true;
 	}
 
 	// Use this for initialization

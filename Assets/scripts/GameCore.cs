@@ -1,14 +1,17 @@
 ﻿using System.Collections;
 using System;
 using System.Collections.Generic;
+//using UnityEditor.Advertisements;
 using Random = UnityEngine.Random;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Advertisements;
 
-public class GameCore : MonoBehaviour {
+public class GameCore : MonoBehaviour
+{
 
 	BotFactory botFactory;
-    RoadFactory roadFactory;
+	RoadFactory roadFactory;
 
 
 	private const int GAME_IDLE = 0;
@@ -18,32 +21,80 @@ public class GameCore : MonoBehaviour {
 	private int gameState = GAME_IDLE;
 
 	public GameObject player;
-	
+
 	List<GameObject> bgs = new List<GameObject>();
 	List<GameObject> roads = new List<GameObject>();
-    List<GameObject> borders = new List<GameObject>();
+	List<GameObject> borders = new List<GameObject>();
 	List<GameObject> bots = new List<GameObject>();
 	public List<GameObject> items = new List<GameObject>();
 
-    public GameObject cameraMain;
+	public GameObject cameraMain;
 
-    public GameObject dialogGameStart;
-    public GameObject dialogGameEnd;
+	public GameObject dialogGameStart;
+	public GameObject dialogGameEnd;
+	public GameObject dialogGuide;
 	public GameObject gameDashboard;
 	public GameObject dashboardDurability;
 	public GameObject dashboardScore;
 	public GameObject dashboardDistance;
 
-	float speed = 1f;
+	private float speed = 1f;
 	private float distance;
 	private float score;
 	private float scoreSpeed;
 
+	private Boolean extrHealth = false;
+
+	private float guideTime;
+	private float guidTimeToShow = 4f;
+
+	private float[] speedLevels = {0f, 2f, 4f, 8f, 16f, 32f, 64f, 128f};
+
 	// Use this for initialization
 	void Start() {
 	}
+	
+	// ----------------------------------
+	// music
+	// ----------------------------------
+	public void musicSwitch() {
+		GetComponent<AudioSource>().mute = !GetComponent<AudioSource>().mute;
+		
+		GameObject buttonMuteText = dialogGameStart.transform.Find("buttonMute").gameObject.transform.Find("buttonMuteText").gameObject;
+		buttonMuteText.GetComponent<Text>().text = GetComponent<AudioSource>().mute ? "Music: ON" : "Music: OFF";
+	}
+	// ----------------------------------
+
+	// ----------------------------------
+	// Unity ads
+	// ----------------------------------
+	public void showUnityAd() {
+		ShowOptions options = new ShowOptions();
+		options.resultCallback = HandleShowResult;
+
+		Advertisement.Show("rewardedVideo", options);
+	}
+	
+	void HandleShowResult (ShowResult result)
+	{
+		if(result == ShowResult.Finished) {
+			//Debug.Log("Video completed - Offer a reward to the player");
+			GameObject buttonAd = dialogGameEnd.transform.Find("buttonAd").gameObject;
+			buttonAd.SetActive(false);
+			extrHealth = true;
+		} else if(result == ShowResult.Skipped) {
+			//Debug.LogWarning("Video was skipped - Do NOT reward the player");
+
+		} else if(result == ShowResult.Failed) {
+			//Debug.LogError("Video failed to show");
+		}
+	}
+	// ----------------------------------
 
 	public void initGame() {
+		
+		Advertisement.Initialize("1562601");
+		
 		player = GameObject.FindGameObjectWithTag("Player");
 		speed = player.GetComponent<PlayerCore>().Speed;
 		
@@ -56,6 +107,7 @@ public class GameCore : MonoBehaviour {
 		
 		dialogGameStart = GameObject.FindGameObjectWithTag("DialogStart");
 		dialogGameEnd = GameObject.FindGameObjectWithTag("DialogEnd");
+		dialogGuide = GameObject.FindGameObjectWithTag("DialogGuide");
 		gameDashboard = GameObject.FindGameObjectWithTag("DialogDashboard");
 		dashboardDurability = GameObject.Find("labelHealth");
 		dashboardScore = GameObject.Find("labelScore");
@@ -67,14 +119,17 @@ public class GameCore : MonoBehaviour {
 	public void idleGame() {
 		gameState = GAME_IDLE;
 		dialogGameStart.SetActive(true);
+		dialogGuide.SetActive(false);
 		dialogGameEnd.SetActive(false);
 		gameDashboard.SetActive(false);
 
 		distance = 0;
 		scoreSpeed = 1f;
 		score = 0f;
+
+		guideTime = 0f;
 		
-		player.GetComponent<PlayerCore>().init();
+		player.GetComponent<PlayerCore>().init(extrHealth);
 		
 		botFactory.clearBots(bots);
 		items.Clear();
@@ -84,18 +139,23 @@ public class GameCore : MonoBehaviour {
 	    gameState = GAME_LIVE;
 	    
         dialogGameStart.SetActive(false);
+	    dialogGuide.SetActive(true);
 	    gameDashboard.SetActive(true);
-
-        //cameraMain = GameObject.FindGameObjectWithTag("MainCamera");
 
         botFactory = GetComponent<BotFactory>();
         botFactory.initBots(bots, 4);
     }
 
 	private void endGame() {
-		gameState = GAME_OVER;
 		dialogGameEnd.SetActive(true);
 		gameDashboard.SetActive(false);
+
+		extrHealth = false;
+		GameObject buttonAd = dialogGameEnd.transform.Find("buttonAd").gameObject;
+		buttonAd.SetActive(true);
+		
+		player.GetComponent<PlayerCore>().animationStop();
+		botFactory.animationStop(bots);
 		
 		GameObject gameResults = GameObject.Find("valuesStatistic");
 		gameResults.GetComponent<Text>().text = Math.Round(score, 0)
@@ -105,26 +165,47 @@ public class GameCore : MonoBehaviour {
 		
 	// Update is called once per frame
 	void Update() {
+		
 		float dt = Time.deltaTime;
+		float speedLevel = speed;
+		float scoreX = 1;
+		for (int i = speedLevels.Length - 1; i > 0; i --)
+			if (distance / 100f > speedLevels[i]) {
+				speedLevel = speed + i / 2f;
+				scoreX += i;
+				break;
+			}
+		
 		botFactory = GetComponent<BotFactory> ();
 		roadFactory = GetComponent<RoadFactory>();
 
 		if (gameState == GAME_IDLE) {
-			roadFactory.updateBorders(borders, speed, dt);
-			roadFactory.updateRoads(roads, speed, dt);
-			roadFactory.updateBgs(bgs, speed, dt);
-		} else if (gameState == GAME_LIVE) {
-			roadFactory.updateBorders(borders, speed, dt);
-			roadFactory.updateRoads(roads, speed, dt);
-			roadFactory.updateBgs(bgs, speed, dt);
+			roadFactory.updateBorders(borders, speedLevel, dt);
+			roadFactory.updateRoads(roads, speedLevel, dt);
+			roadFactory.updateBgs(bgs, speedLevel, dt);
 			
-			if (botFactory.updateBots(player, bots, dt) || player.GetComponent<PlayerCore>().updatePlayer(dt)) {
+			if (Input.GetKeyDown(KeyCode.Escape)) Application.Quit();
+			
+		} else if (gameState == GAME_LIVE) {
+			guideTime += dt;
+			guideTime = Math.Min(guideTime, guidTimeToShow);
+			dialogGuide.SetActive(Math.Round(guideTime * 10f, 0) % 10 > 0f && Math.Round(guideTime * 10f, 0) % 10 < 7f ? true : false);
+
+			speedLevel += player.GetComponent<PlayerCore>().isBordered ? -1f : 0f;
+			
+			roadFactory.updateBorders(borders, speedLevel, dt);
+			roadFactory.updateRoads(roads, speedLevel, dt);
+			roadFactory.updateBgs(bgs, speedLevel, dt);
+			
+			if (botFactory.updateBots(player, speedLevel, bots, dt) || player.GetComponent<PlayerCore>().updatePlayer(dt)) {
+				gameState = GAME_OVER;
 				endGame();
+				return;
 			}
 
-			distance += speed * dt;
+			distance += speedLevel * dt;
 			scoreSpeed += dt;
-			if (!player.GetComponent<PlayerCore>().isBordered) score += scoreSpeed * dt;
+			if (!player.GetComponent<PlayerCore>().isBordered) score += scoreX * scoreSpeed * dt;
 
 			dashboardDurability.GetComponent<Text>().text = "Health: " + player.GetComponent<PlayerCore>().getDurability();
 			dashboardScore.GetComponent<Text>().text = "Score: " + Math.Round(score, 0);
