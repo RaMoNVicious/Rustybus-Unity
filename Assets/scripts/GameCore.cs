@@ -38,6 +38,9 @@ public class GameCore : MonoBehaviour
 	public GameObject dashboardScore;
 	public GameObject dashboardDistance;
 
+	private GameObject muteOff;
+	private GameObject muteOn;
+
 	private float speed = 1f;
 	private float distance;
 	private float score;
@@ -49,6 +52,8 @@ public class GameCore : MonoBehaviour
 	private float guidTimeToShow = 4f;
 
 	private float[] speedLevels = {0f, 2f, 4f, 8f, 16f, 32f, 64f, 128f};
+	private float[] botLevels = {0f, 3f, 6f, 12f, 24f, 48f, 96f};
+	private int lastBotLevelIndex = 0;
 
 	// Use this for initialization
 	void Start() {
@@ -59,9 +64,14 @@ public class GameCore : MonoBehaviour
 	// ----------------------------------
 	public void musicSwitch() {
 		GetComponent<AudioSource>().mute = !GetComponent<AudioSource>().mute;
+		PlayerPrefs.SetInt("muted", GetComponent<AudioSource>().mute ? 1 : 0);
 		
-		GameObject buttonMuteText = dialogGameStart.transform.Find("buttonMute").gameObject.transform.Find("buttonMuteText").gameObject;
-		buttonMuteText.GetComponent<Text>().text = GetComponent<AudioSource>().mute ? "Music: ON" : "Music: OFF";
+		
+		if (muteOn == null) muteOn = GameObject.Find("buttonMute").gameObject.transform.Find("muteOn").gameObject;
+		if (muteOff == null) muteOff = GameObject.Find("buttonMute").gameObject.transform.Find("muteOff").gameObject;
+		
+		muteOn.SetActive(GetComponent<AudioSource>().mute);
+		muteOff.SetActive(!GetComponent<AudioSource>().mute);
 	}
 	// ----------------------------------
 
@@ -113,6 +123,14 @@ public class GameCore : MonoBehaviour
 		dashboardScore = GameObject.Find("labelScore");
 		dashboardDistance = GameObject.Find("labelDistance");
 		
+		if (muteOn == null) muteOn = GameObject.Find("buttonMute").gameObject.transform.Find("muteOn").gameObject;
+		if (muteOff == null) muteOff = GameObject.Find("buttonMute").gameObject.transform.Find("muteOff").gameObject;
+
+		Boolean muted = PlayerPrefs.GetInt("muted") != 0;
+		GetComponent<AudioSource>().mute = muted;
+		muteOn.SetActive(muted);
+		muteOff.SetActive(!muted);
+		
 		idleGame();
 	}
 
@@ -142,6 +160,9 @@ public class GameCore : MonoBehaviour
 	    dialogGuide.SetActive(true);
 	    gameDashboard.SetActive(true);
 
+	    player.GetComponent<PlayerCore>().getFlat();
+
+	    lastBotLevelIndex = 0;
         botFactory = GetComponent<BotFactory>();
         botFactory.initBots(bots, 4);
     }
@@ -169,7 +190,7 @@ public class GameCore : MonoBehaviour
 		float dt = Time.deltaTime;
 		float speedLevel = speed;
 		float scoreX = 1;
-		for (int i = speedLevels.Length - 1; i > 0; i --)
+		for (int i = speedLevels.Length - 1; i >= 0; i --)
 			if (distance / 100f > speedLevels[i]) {
 				speedLevel = speed + i / 2f;
 				scoreX += i;
@@ -192,6 +213,19 @@ public class GameCore : MonoBehaviour
 			dialogGuide.SetActive(Math.Round(guideTime * 10f, 0) % 10 > 0f && Math.Round(guideTime * 10f, 0) % 10 < 7f ? true : false);
 
 			speedLevel += player.GetComponent<PlayerCore>().isBordered ? -1f : 0f;
+			player.GetComponent<PlayerCore>().updateDistance(distance);
+
+			/*for (int i = botLevels.Length - 1; i >= 0; i--) {
+				if (distance > botLevels[i] * 100f) {
+					if (lastBotLevelIndex != i) {
+						lastBotLevelIndex = i;
+						botFactory.addBot(bots);
+					}
+					break;
+				}
+			}
+
+			print("bots count = " + bots.Count);*/
 			
 			roadFactory.updateBorders(borders, speedLevel, dt);
 			roadFactory.updateRoads(roads, speedLevel, dt);

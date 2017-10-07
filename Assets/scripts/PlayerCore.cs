@@ -23,17 +23,35 @@ public class PlayerCore : MonoBehaviour {
 	
 	private float durability;
 	public float durabilitySpeed;
+
+	private float steerX = 0f;
 	
 	private float[] lines = {-2.9f, -2.15f, -1.45f, -0.75f, 0f, 0.75f, 1.45f, 2.15f, 2.9f};
 	private int[] zOrderLines = {1100, 1075, 1050, 1025, 1000, 975, 950, 925, 900};
-	
+	private float[] speedLevels = {0f, 2f, 4f, 8f, 16f, 32f, 64f, 128f};
+
 
 	public void init(Boolean isExtraHealth) {
 		isBordered = false;
 		steering = false;
+		steerX = 0;
 		durability = isExtraHealth ? 200 : 100;
 		transform.position = new Vector3(-5f, 0f, 0f);
+		GetComponent<Animator>().SetTrigger("gotNormal");
 		animationStart();
+	}
+
+	public void getFlat() {
+		GetComponent<Animator>().SetTrigger("gotFlat");
+	}
+
+	public void updateDistance(float distance) {
+		steerX = distance == 0f ? 0f : 1000f;
+		for (int i = speedLevels.Length - 1; i >= 0; i --)
+			if (distance > speedLevels[i] * 100f) {
+				steerX = i / 10f;
+				break;
+			}
 	}
 
 	public Boolean updatePlayer(float dt) {
@@ -43,7 +61,9 @@ public class PlayerCore : MonoBehaviour {
 		} else if (Input.GetKeyUp(KeyCode.Space) || Input.touchCount == 0) {
 			steering = false;
 		}
-
+		
+		GetComponent<Animator>().SetTrigger(steering ? "gotTurn" : "gotFlat");
+		
 		if (steering) {
 			fallSpeed += steerAcc * dt;		// "-" - go up
 			fallSpeed = Math.Min(fallSpeed, steerSpeedMax);
@@ -54,7 +74,7 @@ public class PlayerCore : MonoBehaviour {
 			fallSpeed = Math.Max(fallSpeed, -fallSpeedMax);
 		}
 
-		float y = transform.position.y + fallSpeed * dt;
+		float y = transform.position.y + (1f + steerX) * fallSpeed * dt;
 		if (y < yMin) fallSpeed = 0;
 		
 		y = Math.Min(y, yMax);
