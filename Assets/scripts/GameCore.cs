@@ -2,13 +2,17 @@
 using System;
 using System.Collections.Generic;
 //using UnityEditor.Advertisements;
-using Random = UnityEngine.Random;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Advertisements;
+using GoogleMobileAds;
+using GoogleMobileAds.Api;
 
 public class GameCore : MonoBehaviour
 {
+
+	private RewardBasedVideoAd rewardBasedVideoAd;
+	private BannerView bannerAd;
 
 	BotFactory botFactory;
 	RoadFactory roadFactory;
@@ -46,6 +50,9 @@ public class GameCore : MonoBehaviour
 	private float score;
 	private float scoreSpeed;
 
+	private float endTimer = 0f;
+	private const float END_GAME_ANIMATION_TIME = 3f;
+
 	private Boolean extrHealth = false;
 
 	private float guideTime;
@@ -75,10 +82,15 @@ public class GameCore : MonoBehaviour
 	}
 	// ----------------------------------
 
+	public void showRewardAds() {
+		//showUnityRewardAd();
+		showAdMobRewardAd();
+	}
+	
 	// ----------------------------------
 	// Unity ads
 	// ----------------------------------
-	public void showUnityAd() {
+	private void showUnityRewardAd() {
 		ShowOptions options = new ShowOptions();
 		options.resultCallback = HandleShowResult;
 
@@ -101,9 +113,69 @@ public class GameCore : MonoBehaviour
 	}
 	// ----------------------------------
 
+	
+	// ----------------------------------
+	// AdMob ads
+	// ----------------------------------
+	private void loadRewardBasedAd() {
+		#if UNITY_EDITOR
+		string adUnitId = "unused";
+		#elif UNITY_ANDROID
+		string adUnitId = "ca-app-pub-6337813370020696/8122059181";
+		#elif UNITY_IPHONE
+		string adUnitId = "unused";
+		#else
+		string adUnitId = "unexpected_platform";
+		#endif
+		
+		rewardBasedVideoAd.LoadAd(new AdRequest.Builder().Build(), adUnitId);
+	}
+
+	private void loadBannerAd()
+	{
+		AdRequest banneRequest = new AdRequest.Builder().Build();
+		
+		#if UNITY_EDITOR
+		string adUnitId = "unused";
+		#elif UNITY_ANDROID
+		string adUnitId = "ca-app-pub-6337813370020696/9135757953";
+		#elif UNITY_IPHONE
+		string adUnitId = "unused";
+		#else
+		string adUnitId = "unexpected_platform";
+		#endif
+		
+		bannerAd = new BannerView(adUnitId, AdSize.Banner, AdPosition.Top);
+		bannerAd.LoadAd(banneRequest);
+	}
+
+	private void showAdMobRewardAd() {
+		if (endTimer > 0 && endTimer < 3) return;
+		
+		if (rewardBasedVideoAd.IsLoaded()) {
+			bannerAd.Hide();
+			rewardBasedVideoAd.Show();
+		} else {
+			print("Ad NOT loaded.");
+		}
+	}
+	
+	public event EventHandler<Reward> OnAdRewarded;
+
+	public void HandleOnAdRewarded(object sender, Reward args) {
+		print("Ad Reward.");
+		GameObject buttonAd = dialogGameEnd.transform.Find("buttonAd").gameObject;
+		buttonAd.SetActive(false);
+		bannerAd.Show();
+		extrHealth = true;
+	}
+	// ----------------------------------
+	
 	public void initGame() {
 		
 		Advertisement.Initialize("1562601");
+		rewardBasedVideoAd = RewardBasedVideoAd.Instance;
+		rewardBasedVideoAd.OnAdRewarded += HandleOnAdRewarded;
 		
 		player = GameObject.FindGameObjectWithTag("Player");
 		speed = player.GetComponent<PlayerCore>().Speed;
@@ -135,6 +207,8 @@ public class GameCore : MonoBehaviour
 	}
 
 	public void idleGame() {
+		if (endTimer > 0 && endTimer < 4) return; // TODO: make nice buttons appear
+		
 		gameState = GAME_IDLE;
 		dialogGameStart.SetActive(true);
 		dialogGuide.SetActive(false);
@@ -151,6 +225,10 @@ public class GameCore : MonoBehaviour
 		
 		botFactory.clearBots(bots);
 		items.Clear();
+		
+		loadBannerAd();
+		bannerAd.Destroy();
+		loadRewardBasedAd();
 	}
 
     public void startGame() {
@@ -165,6 +243,8 @@ public class GameCore : MonoBehaviour
 	    lastBotLevelIndex = 0;
         botFactory = GetComponent<BotFactory>();
         botFactory.initBots(bots, 4);
+
+	    endTimer = 0f;
     }
 
 	private void endGame() {
@@ -178,10 +258,7 @@ public class GameCore : MonoBehaviour
 		player.GetComponent<PlayerCore>().animationStop();
 		botFactory.animationStop(bots);
 		
-		GameObject gameResults = GameObject.Find("valuesStatistic");
-		gameResults.GetComponent<Text>().text = Math.Round(score, 0)
-		                                        + "\n" + Math.Round(distance / 100, 2)
-		                                        + "km\n" + botFactory.overtakes;
+		bannerAd.Show();
 	}
 		
 	// Update is called once per frame
@@ -244,6 +321,26 @@ public class GameCore : MonoBehaviour
 			dashboardDurability.GetComponent<Text>().text = "Health: " + player.GetComponent<PlayerCore>().getDurability();
 			dashboardScore.GetComponent<Text>().text = "Score: " + Math.Round(score, 0);
 			dashboardDistance.GetComponent<Text>().text = Math.Round(distance / 100, 2) + "km";
+		} else if (gameState == GAME_OVER)
+		{
+			print("endTimer = " + endTimer);
+			GameObject gameResults = GameObject.Find("valuesStatistic");
+			if (endTimer < 1) {
+				endTimer += dt;
+				gameResults.GetComponent<Text>().text = "-\n-km\n-";
+			} else  if (endTimer < 2) {
+				endTimer += dt;
+				gameResults.GetComponent<Text>().text = Math.Round(score, 0) + "\n-km\n-";
+			} else if (endTimer < 3) {
+				endTimer += dt;
+				gameResults.GetComponent<Text>().text = Math.Round(score, 0)
+				                                        + "\n" + Math.Round(distance / 100, 2)
+				                                        + "km\n-";
+			} else {
+				gameResults.GetComponent<Text>().text = Math.Round(score, 0)
+														+ "\n" + Math.Round(distance / 100, 2)
+														+ "km\n" + botFactory.overtakes;
+			}
 		}
 	}
 }

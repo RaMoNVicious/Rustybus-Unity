@@ -125,7 +125,7 @@ PlayerSettings:
     16:10: 1
     16:9: 1
     Others: 1
-  bundleVersion: 0.6b
+  bundleVersion: 0.8b
   preloadedAssets: []
   metroInputSource: 0
   m_HolographicPauseOnTrackingLoss: 1
@@ -147,7 +147,7 @@ PlayerSettings:
   applicationIdentifier:
     Android: com.viciousconcepts.cg.rustybus
   buildNumber: {}
-  AndroidBundleVersionCode: 6
+  AndroidBundleVersionCode: 8
   AndroidMinSdkVersion: 19
   AndroidTargetSdkVersion: 0
   AndroidPreferredInstallLocation: 0
@@ -262,7 +262,7 @@ PlayerSettings:
   - m_BuildTarget: 
     m_Icons:
     - serializedVersion: 2
-      m_Icon: {fileID: 2800000, guid: 13554e22f7d7a4c98863c0e568a8830e, type: 3}
+      m_Icon: {fileID: 2800000, guid: f95d453f720214a6a85c1bebe3f02c00, type: 3}
       m_Width: 128
       m_Height: 128
   m_BuildTargetBatching: []
