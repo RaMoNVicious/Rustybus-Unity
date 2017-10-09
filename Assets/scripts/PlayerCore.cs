@@ -35,6 +35,7 @@ public class PlayerCore : MonoBehaviour {
 		isBordered = false;
 		steering = false;
 		steerX = 0;
+		fallSpeed = 0;
 		durability = isExtraHealth ? 200 : 100;
 		transform.position = new Vector3(-5f, 0f, 0f);
 		GetComponent<Animator>().SetTrigger("gotNormal");

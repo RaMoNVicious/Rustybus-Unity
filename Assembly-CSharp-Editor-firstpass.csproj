@@ -122,20 +122,20 @@
     <Reference Include="UnityEditor.OSXStandalone.Extensions">
       <HintPath>/Applications/Unity/Unity.app/Contents/PlaybackEngines/MacStandaloneSupport/UnityEditor.OSXStandalone.Extensions.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.Advertisements.Editor">
-      <HintPath>/Users/Vicious/UnityProjects/Rustybus/Assets/UnityAds/UnityEngine.Advertisements.Editor.dll</HintPath>
-    </Reference>
     <Reference Include="Google.IOSResolver_v1.2.52.0">
       <HintPath>/Users/Vicious/UnityProjects/Rustybus/Assets/PlayServicesResolver/Editor/Google.IOSResolver_v1.2.52.0.dll</HintPath>
     </Reference>
-    <Reference Include="Google.VersionHandlerImpl_v1.2.52.0">
-      <HintPath>/Users/Vicious/UnityProjects/Rustybus/Assets/PlayServicesResolver/Editor/Google.VersionHandlerImpl_v1.2.52.0.dll</HintPath>
+    <Reference Include="Google.JarResolver_v1.2.52.0">
+      <HintPath>/Users/Vicious/UnityProjects/Rustybus/Assets/PlayServicesResolver/Editor/Google.JarResolver_v1.2.52.0.dll</HintPath>
     </Reference>
     <Reference Include="Google.VersionHandler">
       <HintPath>/Users/Vicious/UnityProjects/Rustybus/Assets/PlayServicesResolver/Editor/Google.VersionHandler.dll</HintPath>
     </Reference>
-    <Reference Include="Google.JarResolver_v1.2.52.0">
-      <HintPath>/Users/Vicious/UnityProjects/Rustybus/Assets/PlayServicesResolver/Editor/Google.JarResolver_v1.2.52.0.dll</HintPath>
+    <Reference Include="Google.VersionHandlerImpl_v1.2.52.0">
+      <HintPath>/Users/Vicious/UnityProjects/Rustybus/Assets/PlayServicesResolver/Editor/Google.VersionHandlerImpl_v1.2.52.0.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.Advertisements.Editor">
+      <HintPath>/Users/Vicious/UnityProjects/Rustybus/Assets/UnityAds/UnityEngine.Advertisements.Editor.dll</HintPath>
     </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

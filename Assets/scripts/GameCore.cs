@@ -50,9 +50,6 @@ public class GameCore : MonoBehaviour
 	private float score;
 	private float scoreSpeed;
 
-	private float endTimer = 0f;
-	private const float END_GAME_ANIMATION_TIME = 3f;
-
 	private Boolean extrHealth = false;
 
 	private float guideTime;
@@ -207,8 +204,6 @@ public class GameCore : MonoBehaviour
 	}
 
 	public void idleGame() {
-		if (endTimer > 0 && endTimer < 4) return; // TODO: make nice buttons appear
-		
 		gameState = GAME_IDLE;
 		dialogGameStart.SetActive(true);
 		dialogGuide.SetActive(false);
@@ -226,8 +221,7 @@ public class GameCore : MonoBehaviour
 		botFactory.clearBots(bots);
 		items.Clear();
 		
-		loadBannerAd();
-		bannerAd.Destroy();
+		if (bannerAd != null) bannerAd.Destroy();
 		loadRewardBasedAd();
 	}
 
@@ -243,24 +237,48 @@ public class GameCore : MonoBehaviour
 	    lastBotLevelIndex = 0;
         botFactory = GetComponent<BotFactory>();
         botFactory.initBots(bots, 4);
-
-	    endTimer = 0f;
     }
 
 	private void endGame() {
 		dialogGameEnd.SetActive(true);
 		gameDashboard.SetActive(false);
+		dialogGuide.SetActive(false);
 
 		extrHealth = false;
-		GameObject buttonAd = dialogGameEnd.transform.Find("buttonAd").gameObject;
-		buttonAd.SetActive(true);
+		if (btnClose == null) btnClose = dialogGameEnd.transform.Find("buttonEndClose").gameObject;
+		if (btnReward == null) btnReward = dialogGameEnd.transform.Find("buttonAd").gameObject;
+		btnClose.SetActive(false);
+		btnReward.SetActive(false);
 		
 		player.GetComponent<PlayerCore>().animationStop();
 		botFactory.animationStop(bots);
 		
+		loadBannerAd();
 		bannerAd.Show();
+
+		endResultCurrent = END_GAME_INIT;
+		endTimer = 0f;
+		endResultD = scoreEnd = distanceEnd = overtakesEnd = 0;
 	}
-		
+
+	// end game animation variables
+	private float endResultD;
+	private float scoreEnd;
+	private float distanceEnd;
+	private float overtakesEnd;
+	private const int END_GAME_INIT = 0;
+	private const int END_GAME_SCORE = 1;
+	private const int END_GAME_DISTANCE = 2;
+	private const int END_GAME_OVERTAKES = 3;
+	private const int END_GAME_BUTTON_REWARD = 4;
+	private const int END_GAME_BUTTON_CLOSE = 5;
+	private const int END_GAME_ALL = 99;
+	private int endResultCurrent;
+	private float endTimer;
+	private const float END_GAME_ANIMATION_TIME = 1f;
+	private GameObject btnClose;
+	private GameObject btnReward;
+	
 	// Update is called once per frame
 	void Update() {
 		
@@ -284,7 +302,15 @@ public class GameCore : MonoBehaviour
 			
 			if (Input.GetKeyDown(KeyCode.Escape)) Application.Quit();
 			
-		} else if (gameState == GAME_LIVE) {
+		} else if (gameState == GAME_LIVE)
+		{
+			if (Input.GetKey(KeyCode.Escape)) {
+				gameState = GAME_OVER;
+				endGame();
+			}
+
+			//int botsCountOld = bots.Count;
+			
 			guideTime += dt;
 			guideTime = Math.Min(guideTime, guidTimeToShow);
 			dialogGuide.SetActive(Math.Round(guideTime * 10f, 0) % 10 > 0f && Math.Round(guideTime * 10f, 0) % 10 < 7f ? true : false);
@@ -296,13 +322,12 @@ public class GameCore : MonoBehaviour
 				if (distance > botLevels[i] * 100f) {
 					if (lastBotLevelIndex != i) {
 						lastBotLevelIndex = i;
+						//print("BOT ADDED");
 						botFactory.addBot(bots);
 					}
 					break;
 				}
-			}
-
-			print("bots count = " + bots.Count);*/
+			}*/
 			
 			roadFactory.updateBorders(borders, speedLevel, dt);
 			roadFactory.updateRoads(roads, speedLevel, dt);
@@ -313,6 +338,8 @@ public class GameCore : MonoBehaviour
 				endGame();
 				return;
 			}
+			
+			//if (bots.Count != botsCountOld) print("bots count = " + bots.Count);
 
 			distance += speedLevel * dt;
 			scoreSpeed += dt;
@@ -323,24 +350,85 @@ public class GameCore : MonoBehaviour
 			dashboardDistance.GetComponent<Text>().text = Math.Round(distance / 100, 2) + "km";
 		} else if (gameState == GAME_OVER)
 		{
-			print("endTimer = " + endTimer);
 			GameObject gameResults = GameObject.Find("valuesStatistic");
-			if (endTimer < 1) {
-				endTimer += dt;
-				gameResults.GetComponent<Text>().text = "-\n-km\n-";
-			} else  if (endTimer < 2) {
-				endTimer += dt;
-				gameResults.GetComponent<Text>().text = Math.Round(score, 0) + "\n-km\n-";
-			} else if (endTimer < 3) {
-				endTimer += dt;
-				gameResults.GetComponent<Text>().text = Math.Round(score, 0)
-				                                        + "\n" + Math.Round(distance / 100, 2)
-				                                        + "km\n-";
-			} else {
-				gameResults.GetComponent<Text>().text = Math.Round(score, 0)
-														+ "\n" + Math.Round(distance / 100, 2)
-														+ "km\n" + botFactory.overtakes;
-			}
+			gameResults.GetComponent<Text>().text = endGameResults(dt);
 		}
+	}
+
+	private string endGameResults(float dt)
+	{
+		if (btnClose == null) btnClose = dialogGameEnd.transform.Find("buttonEndClose").gameObject;
+		if (btnReward == null) btnReward = dialogGameEnd.transform.Find("buttonAd").gameObject;
+		
+		switch (endResultCurrent)
+		{
+			case END_GAME_INIT:
+				if (endTimer > END_GAME_ANIMATION_TIME / 2f) {
+					endTimer = 0f;
+					endResultCurrent = END_GAME_SCORE;
+					endResultD = score / END_GAME_ANIMATION_TIME;
+				} else {
+					endTimer += dt;
+				}
+				break;
+			case END_GAME_SCORE:
+				if (endTimer > END_GAME_ANIMATION_TIME) {
+					endTimer = 0f;
+					scoreEnd = score;
+					endResultCurrent = END_GAME_DISTANCE;
+					endResultD = distance / END_GAME_ANIMATION_TIME;
+				} else {
+					endTimer += dt;
+					scoreEnd += endResultD * dt;
+				}
+				break;
+			case END_GAME_DISTANCE: 
+				if (endTimer > END_GAME_ANIMATION_TIME) {
+					endTimer = 0f;
+					distanceEnd = distance;
+					endResultCurrent = END_GAME_OVERTAKES;
+					endResultD = botFactory.overtakes / END_GAME_ANIMATION_TIME;
+				} else {
+					endTimer += dt;
+					distanceEnd += endResultD * dt;
+				}
+				break;
+			case END_GAME_OVERTAKES: 
+				if (endTimer > END_GAME_ANIMATION_TIME) {
+					endTimer = 0f;
+					overtakesEnd = botFactory.overtakes;
+					endResultCurrent = END_GAME_BUTTON_REWARD;
+				} else {
+					endTimer += dt;
+					overtakesEnd += endResultD * dt;
+				}
+				break;
+			case END_GAME_BUTTON_REWARD: 
+				if (endTimer > END_GAME_ANIMATION_TIME / 2f) {
+					endTimer = 0f;
+					btnReward.SetActive(true);
+					endResultCurrent = END_GAME_BUTTON_CLOSE;
+				} else {
+					endTimer += dt;
+				}
+				break;
+			case END_GAME_BUTTON_CLOSE: 
+				if (endTimer > END_GAME_ANIMATION_TIME / 2f) {
+					endTimer = 0f;
+					btnClose.SetActive(true);
+					endResultCurrent = END_GAME_ALL;
+				} else {
+					endTimer += dt;
+				}
+				break;
+			case END_GAME_ALL:
+				break;
+		}
+
+		string scoreToResult = endResultCurrent < END_GAME_SCORE ? "" : Math.Round(scoreEnd, 0) + "";
+		string distanceToResult = endResultCurrent < END_GAME_DISTANCE ? "" : Math.Round(distanceEnd / 100, 2) + "km";
+		string overtakesToResult = endResultCurrent < END_GAME_OVERTAKES ? "" : Math.Round(overtakesEnd, 0) + "";
+
+		return scoreToResult + "\n" + distanceToResult + "\n" + overtakesToResult;
 	}
 }

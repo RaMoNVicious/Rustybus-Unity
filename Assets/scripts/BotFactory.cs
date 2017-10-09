@@ -60,17 +60,22 @@ public class BotFactory : MonoBehaviour {
 		const int MAX_COUNT = 500;
 
 		Vector3 position;
+		int roadLine;// = Random.Range(0, lines.Length);
 
 		float distance;
 		int iteration = 0;
 		do {
-			position = new Vector3(Random.Range(START_X_MIN, START_X_MAX), lines[Random.Range(0, lines.Length)], 0f);
+			roadLine = Random.Range(0, lines.Length);
+			position = new Vector3(Random.Range(START_X_MIN, START_X_MAX), lines[roadLine], 0f);
 			distance = 1000f;
 			for (int i = 0; i < bots.Count; i++) {
-				distance = Math.Min(distance, Vector3.Distance(position, bots[i].transform.position));
+				if (bots[i].transform.position.y == position.y)
+					distance = Math.Min(distance, Vector3.Distance(position, bots[i].transform.position));
 			}
 			if (iteration > MAX_COUNT) break; else iteration ++;
-		} while (distance < MIN_DISTANCE);		 
+		} while (distance < MIN_DISTANCE);
+		
+		if (iteration > MAX_COUNT) print("iterations to getPosition = " + iteration);
 		return position;
 	}
 
