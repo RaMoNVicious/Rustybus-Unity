@@ -309,7 +309,7 @@ public class GameCore : MonoBehaviour
 				endGame();
 			}
 
-			//int botsCountOld = bots.Count;
+			int botsCountOld = bots.Count;
 			
 			guideTime += dt;
 			guideTime = Math.Min(guideTime, guidTimeToShow);
@@ -318,16 +318,16 @@ public class GameCore : MonoBehaviour
 			speedLevel += player.GetComponent<PlayerCore>().isBordered ? -1f : 0f;
 			player.GetComponent<PlayerCore>().updateDistance(distance);
 
-			/*for (int i = botLevels.Length - 1; i >= 0; i--) {
+			for (int i = botLevels.Length - 1; i >= 0; i--) {
 				if (distance > botLevels[i] * 100f) {
 					if (lastBotLevelIndex != i) {
 						lastBotLevelIndex = i;
-						//print("BOT ADDED");
+						print("BOT ADDED");
 						botFactory.addBot(bots);
 					}
 					break;
 				}
-			}*/
+			}
 			
 			roadFactory.updateBorders(borders, speedLevel, dt);
 			roadFactory.updateRoads(roads, speedLevel, dt);
@@ -339,7 +339,7 @@ public class GameCore : MonoBehaviour
 				return;
 			}
 			
-			//if (bots.Count != botsCountOld) print("bots count = " + bots.Count);
+			if (bots.Count != botsCountOld) print("bots count = " + bots.Count);
 
 			distance += speedLevel * dt;
 			scoreSpeed += dt;
