@@ -36,7 +36,7 @@ public class BotFactory : MonoBehaviour {
 
 	public void addBot(List<GameObject> bots) {
 		GameObject newBot = Instantiate(getNewBot(), getBotPosition(bots), Quaternion.identity) as GameObject;
-		newBot.transform.SetParent(this.transform);
+		newBot.transform.SetParent(transform);
 		for (int i = 0; i < zOrderLines.Length; i++) {
 			if (newBot.transform.position.y == lines[i]) {
 				newBot.GetComponent<Renderer>().sortingOrder = zOrderLines[i];

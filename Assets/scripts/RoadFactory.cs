@@ -18,8 +18,6 @@ public class RoadFactory : MonoBehaviour {
     public void initBorders(List<GameObject> borders) {
         addBorder(borders, BORDER_TOP);
         addBorder(borders, BORDER_BOTTOM);
-        addBorder(borders, BORDER_TOP);
-        addBorder(borders, BORDER_BOTTOM);
     }
 
     public void initRoads(List<GameObject> roads) {
@@ -32,12 +30,29 @@ public class RoadFactory : MonoBehaviour {
         addBg(bgs);
     }
 
-    GameObject getNewBorder(int side)
-    {
+    GameObject getNewBorder(int side) {
         int itemIndex = side == BORDER_TOP ? Random.Range(0, borderTopPrefabs.Length) : Random.Range(0, borderBottomPrefabs.Length);
         GameObject border = side == BORDER_TOP ? borderTopPrefabs[itemIndex] : borderBottomPrefabs[itemIndex];
         border.GetComponent<RoadBorder>().side = side;
-        return border;
+        if (border.GetComponent<RoadBorder>().pairId == -1) {
+            return border;
+        } else if (side == BORDER_TOP && getNewBorder(side).GetComponent<RoadBorder>().pairId == border.GetComponent<RoadBorder>().pairId) {
+            return border;
+        } else {
+            return getNewBorder(side);
+        }
+    }
+
+    GameObject getBorderPair(int pairId) {
+        for (int i = 0; i < borderBottomPrefabs.Length; i++) {
+            GameObject border = borderBottomPrefabs[i];
+            if (border.GetComponent<RoadBorder>().pairId == pairId) {
+                return border;
+            }
+        }
+
+        print("Error adding pair Border - no pair id founded for pairId = " + pairId);
+        return null;
     }
     
     GameObject getNewRoad() {
@@ -49,12 +64,25 @@ public class RoadFactory : MonoBehaviour {
         return bgPrefabs[bgEven ? 0 : 1];
     }
 
-    void addBorder(List<GameObject> borders, int side) {
-        GameObject newBoroder = Instantiate(getNewBorder(side), new Vector3(0f, 0f, 0f), Quaternion.identity) as GameObject;
-        newBoroder.transform.SetParent(transform);
-        setBorderPosition(newBoroder, borders, side);
-        newBoroder.GetComponent<Renderer>().sortingOrder = side == BORDER_TOP ? 500 : 1500;
-        borders.Add(newBoroder);
+    void addBorder(List<GameObject> borders, int side)
+    {
+        GameObject lastBorder = borders.Count > 0 ? borders[borders.Count - 1] : null;
+        if (lastBorder == null || lastBorder.GetComponent<RoadBorder>().side == BORDER_BOTTOM || lastBorder.GetComponent<RoadBorder>().pairId == -1) {
+            GameObject newBoroder =
+                Instantiate(getNewBorder(side), new Vector3(0f, 0f, 0f), Quaternion.identity) as GameObject;
+            newBoroder.transform.SetParent(transform);
+            setBorderPosition(newBoroder, borders, side);
+            newBoroder.GetComponent<Renderer>().sortingOrder = side == BORDER_TOP ? 500 : 1500;
+            borders.Add(newBoroder);
+        } else if (lastBorder.GetComponent<RoadBorder>().side == BORDER_TOP) {
+            // adding pair border
+            GameObject newPairBorder =
+                Instantiate(getBorderPair(lastBorder.GetComponent<RoadBorder>().pairId), new Vector3(0f, 0f, 0f), Quaternion.identity) as GameObject;
+            newPairBorder.transform.SetParent(transform);
+            setBorderPosition(newPairBorder, borders, BORDER_BOTTOM);
+            newPairBorder.GetComponent<Renderer>().sortingOrder = 1500;
+            borders.Add(newPairBorder);
+        }
     }
 
     void addRoad(List<GameObject> roads) {
@@ -126,11 +154,17 @@ public class RoadFactory : MonoBehaviour {
         for (int i = 0; i < borders.Count; i++) {
             borders[i].transform.position = new Vector3(borders[i].transform.position.x - dt * playerSpeed, borders[i].transform.position.y, 0f);
 
-            if (borders[i].transform.position.x < -1 * borders[i].GetComponent<Renderer>().bounds.size.x) {
+            if (!borders[i].GetComponent<RoadBorder>().respawned &&
+                borders[i].transform.position.x - borders[i].GetComponent<Renderer>().bounds.size.x / 2f < 10.0f)
+            {
                 int side = borders[i].GetComponent<RoadBorder>().side;
+                addBorder(borders, side);
+                borders[i].GetComponent<RoadBorder>().respawned = true;
+            }
+            
+            if (borders[i].transform.position.x + borders[i].GetComponent<Renderer>().bounds.size.x / 2f < -10.0f) {
                 Destroy(borders[i]);
                 borders.Remove(borders[i]);
-                addBorder(borders, side);
                 break;
             }
         }

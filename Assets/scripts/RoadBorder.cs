@@ -5,6 +5,8 @@ using UnityEngine;
 public class RoadBorder : MonoBehaviour {
 
     public int side;
+    public int pairId = -1;
+	public bool respawned = false;
 
 	// Use this for initialization
 	void Start () {

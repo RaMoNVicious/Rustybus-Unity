@@ -80,8 +80,12 @@ public class GameCore : MonoBehaviour
 	// ----------------------------------
 
 	public void showRewardAds() {
-		//showUnityRewardAd();
-		showAdMobRewardAd();
+		#if UNITY_ANDROID 
+			showAdMobRewardAd();
+		#else
+			showUnityRewardAd();
+		#endif
+		
 	}
 	
 	// ----------------------------------
@@ -119,6 +123,8 @@ public class GameCore : MonoBehaviour
 		string adUnitId = "unused";
 		#elif UNITY_ANDROID
 		string adUnitId = "ca-app-pub-6337813370020696/8122059181";
+		#elif UNITY_WEBGL
+		string adUnitId = "ca-app-pub-6337813370020696/8122059181";
 		#elif UNITY_IPHONE
 		string adUnitId = "unused";
 		#else
@@ -135,6 +141,8 @@ public class GameCore : MonoBehaviour
 		#if UNITY_EDITOR
 		string adUnitId = "unused";
 		#elif UNITY_ANDROID
+		string adUnitId = "ca-app-pub-6337813370020696/9135757953";
+		#elif UNITY_WEBGL
 		string adUnitId = "ca-app-pub-6337813370020696/9135757953";
 		#elif UNITY_IPHONE
 		string adUnitId = "unused";
@@ -242,7 +250,6 @@ public class GameCore : MonoBehaviour
 	private void endGame() {
 		dialogGameEnd.SetActive(true);
 		gameDashboard.SetActive(false);
-		dialogGuide.SetActive(false);
 
 		extrHealth = false;
 		if (btnClose == null) btnClose = dialogGameEnd.transform.Find("buttonEndClose").gameObject;
@@ -313,7 +320,7 @@ public class GameCore : MonoBehaviour
 			
 			guideTime += dt;
 			guideTime = Math.Min(guideTime, guidTimeToShow);
-			dialogGuide.SetActive(Math.Round(guideTime * 10f, 0) % 10 > 0f && Math.Round(guideTime * 10f, 0) % 10 < 7f ? true : false);
+			dialogGuide.SetActive(Math.Round(guideTime * 10f, 0) % 10 > 0f && Math.Round(guideTime * 10f, 0) % 10 < 7f && gameState == GAME_LIVE ? true : false);
 
 			speedLevel += player.GetComponent<PlayerCore>().isBordered ? -1f : 0f;
 			player.GetComponent<PlayerCore>().updateDistance(distance);
@@ -345,6 +352,7 @@ public class GameCore : MonoBehaviour
 			scoreSpeed += dt;
 			if (!player.GetComponent<PlayerCore>().isBordered) score += scoreX * scoreSpeed * dt;
 
+			dashboardDurability.GetComponent<Text>().color = !player.GetComponent<PlayerCore>().isBordered ? new Color(1f, 1f, 1f) : new Color(1f, 203/255f, 137/255f); 
 			dashboardDurability.GetComponent<Text>().text = "Health: " + player.GetComponent<PlayerCore>().getDurability();
 			dashboardScore.GetComponent<Text>().text = "Score: " + Math.Round(score, 0);
 			dashboardDistance.GetComponent<Text>().text = Math.Round(distance / 100, 2) + "km";

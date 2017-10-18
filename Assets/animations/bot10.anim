@@ -5,7 +5,7 @@ AnimationClip:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: bot10
+  m_Name: Bot10
   serializedVersion: 6
   m_Legacy: 0
   m_Compressed: 0
@@ -24,6 +24,12 @@ AnimationClip:
       value: {fileID: 21300000, guid: 4319f8ba95b3c42adb4d3bfad4b275de, type: 3}
     - time: 0.16666667
       value: {fileID: 21300000, guid: 3b9dcab866bdc40038fb77a23b06bb50, type: 3}
+    - time: 0.25
+      value: {fileID: 21300000, guid: 4980c2b0322254feebe2d5874764e0e7, type: 3}
+    - time: 0.33333334
+      value: {fileID: 21300000, guid: 9e2530a6e73af443094662683341a2c3, type: 3}
+    - time: 0.41666666
+      value: {fileID: 21300000, guid: 3231802a732ed4d379c71692b408b2a9, type: 3}
     attribute: m_Sprite
     path: 
     classID: 212
@@ -46,12 +52,15 @@ AnimationClip:
     - {fileID: 21300000, guid: b66b9867a17634813b2d0ad1af002fcf, type: 3}
     - {fileID: 21300000, guid: 4319f8ba95b3c42adb4d3bfad4b275de, type: 3}
     - {fileID: 21300000, guid: 3b9dcab866bdc40038fb77a23b06bb50, type: 3}
+    - {fileID: 21300000, guid: 4980c2b0322254feebe2d5874764e0e7, type: 3}
+    - {fileID: 21300000, guid: 9e2530a6e73af443094662683341a2c3, type: 3}
+    - {fileID: 21300000, guid: 3231802a732ed4d379c71692b408b2a9, type: 3}
   m_AnimationClipSettings:
     serializedVersion: 2
     m_AdditiveReferencePoseClip: {fileID: 0}
     m_AdditiveReferencePoseTime: 0
     m_StartTime: 0
-    m_StopTime: 0.25
+    m_StopTime: 0.5
     m_OrientationOffsetY: 0
     m_Level: 0
     m_CycleOffset: 0

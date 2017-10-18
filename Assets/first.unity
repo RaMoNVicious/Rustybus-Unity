@@ -1538,10 +1538,12 @@ MonoBehaviour:
   - {fileID: 1346942002986756, guid: d452f449edb964e1e8ba380a08d6542c, type: 2}
   - {fileID: 1556364236135896, guid: 493b54eaf373d4febbc1806fced287c2, type: 2}
   - {fileID: 1347687229275844, guid: 0ef3a46ca94c24d2fbbbd8d5ab0e6506, type: 2}
+  - {fileID: 1932708284862088, guid: 5021361c4f66241fcbc5239b98710e6a, type: 2}
   borderBottomPrefabs:
   - {fileID: 1405235763211188, guid: d2aa2be100961465f80b0456f4c8a3a4, type: 2}
   - {fileID: 1842523898347114, guid: e1b042d3ecbb34f65a0f43037bf651dd, type: 2}
   - {fileID: 1361434488753378, guid: 09823b9be791245fa9d8ddb1c46cdff8, type: 2}
+  - {fileID: 1595151757555352, guid: 735188f493da145599af070c6943b884, type: 2}
 --- !u!4 &1059860982
 Transform:
   m_ObjectHideFlags: 0
@@ -1579,15 +1581,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   botPrefabs:
-  - {fileID: 1222279358196922, guid: 9319bbfa6b7314e44ae9b43873b534c4, type: 2}
-  - {fileID: 1981130763961464, guid: 1946ab5312d2548d09c3e0cf6aa1ebdd, type: 2}
-  - {fileID: 1242514715344218, guid: d6f125786286b4512a1f92acdbce655f, type: 2}
-  - {fileID: 1007847618575752, guid: aa77cde252a0646f29ba8da2df2b709c, type: 2}
-  - {fileID: 1580379606546624, guid: 39f5b95be4af4415ca1c151144727091, type: 2}
-  - {fileID: 1705060758975932, guid: edbe4e65909934e3186d0232dc5ce08c, type: 2}
-  - {fileID: 1807506328029280, guid: eb4c0bbd88ebc4ef19f3860a85bf646b, type: 2}
-  - {fileID: 1293747339111666, guid: 9c07035bb21f0492bb6afee640f0c1ec, type: 2}
-  - {fileID: 1514042757372754, guid: e480582c8ceba4f24b7d4d3aeb7824a7, type: 2}
+  - {fileID: 1990774120962056, guid: 9319bbfa6b7314e44ae9b43873b534c4, type: 2}
+  - {fileID: 1801441046721964, guid: 1946ab5312d2548d09c3e0cf6aa1ebdd, type: 2}
+  - {fileID: 1406325261024030, guid: d6f125786286b4512a1f92acdbce655f, type: 2}
+  - {fileID: 1030312660186462, guid: aa77cde252a0646f29ba8da2df2b709c, type: 2}
+  - {fileID: 1597337078476884, guid: 39f5b95be4af4415ca1c151144727091, type: 2}
+  - {fileID: 1746312124069668, guid: edbe4e65909934e3186d0232dc5ce08c, type: 2}
+  - {fileID: 1739556164681944, guid: eb4c0bbd88ebc4ef19f3860a85bf646b, type: 2}
+  - {fileID: 1587261322062942, guid: 9c07035bb21f0492bb6afee640f0c1ec, type: 2}
+  - {fileID: 1775346955125608, guid: e480582c8ceba4f24b7d4d3aeb7824a7, type: 2}
   botSpeedMax: 3
   botSpeedMin: 5
   overtakes: 0
